@@ -1,30 +1,28 @@
-
-import { readFileSync } from 'fs';
+import fs from 'fs';
 import path from 'path';
 
-export default async function handler(req, res) {
+export default function handler(req, res) {
   const { code } = req.query;
-  if (!code) return res.status(400).json({ error: 'Missing code' });
+  const feedPath = '/tmp/feed.xml';
 
-  const filePath = path.resolve('/tmp/feed.xml');
-  let xml;
-  try {
-    xml = readFileSync(filePath, 'utf8');
-  } catch (e) {
-    return res.status(500).json({ error: 'Feed not available yet' });
+  if (!fs.existsSync(feedPath)) {
+    return res.status(404).json({ error: 'Feed not available yet' });
   }
 
-  const blockRegex = new RegExp(
-    `<g:id>${code}</g:id>[\s\S]*?<g:availability>(.*?)</g:availability>[\s\S]*?<g:image_link>(.*?)</g:image_link>[\s\S]*?<title><\!\[CDATA\[(.*?)\]\]></title>`,
-    "i"
-  );
+  const xml = fs.readFileSync(feedPath, 'utf8');
 
+  const blockRegex = new RegExp(`<item>([\\s\\S]*?<g:id>${code}</g:id>[\\s\\S]*?)</item>`, 'i');
   const match = xml.match(blockRegex);
-  if (!match) return res.status(404).json({ error: 'Product not found' });
 
-  const dostupnost = match[1];
-  const obrazek = match[2];
-  const nazev = match[3];
+  if (!match) {
+    return res.status(404).json({ error: `Produkt ${code} nebyl nalezen ve feedu.` });
+  }
+
+  const block = match[1];
+
+  const dostupnost = /<g:availability>(.*?)<\/g:availability>/i.exec(block)?.[1] || 'unknown';
+  const obrazek = /<g:image_link>(.*?)<\/g:image_link>/i.exec(block)?.[1] || '';
+  const nazev = /<title><!\[CDATA\[(.*?)\]\]><\/title>/i.exec(block)?.[1] || '';
 
   return res.status(200).json({
     kod: code,
