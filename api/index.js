@@ -1,6 +1,14 @@
 import https from 'https';
 
 export default async function handler(req, res) {
+  // ✅ Kontrola tokenu pro autorizaci
+  const secretToken = process.env.SECRET_TOKEN;  // Token uložený v environment variables
+  const requestToken = req.query.token;          // Token předaný v URL
+
+  if (requestToken !== secretToken) {
+    return res.status(403).json({ error: "Forbidden – invalid token" });
+  }
+
   const { code } = req.query;
   if (!code) return res.status(400).json({ error: 'Chybí parametr ?code=' });
 
