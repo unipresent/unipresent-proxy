@@ -1,11 +1,9 @@
+export const config = {
+  runtime: "nodejs"
+};
 
 import https from 'https';
 import fs from 'fs';
-import path from 'path';
-
-export const config = {
-  runtime: 'edge',
-};
 
 export default async function handler(req, res) {
   const url = 'https://www.unipresent.cz/google-merchant/1831';
