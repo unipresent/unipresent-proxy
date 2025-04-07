@@ -1,7 +1,3 @@
-export const config = {
-  runtime: "nodejs"
-};
-
 import https from 'https';
 import fs from 'fs';
 
