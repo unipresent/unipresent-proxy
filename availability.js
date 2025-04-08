@@ -1,11 +1,20 @@
+// api/availability.js
+
 export default function handler(req, res) {
-  const { product } = req.query; // Získáme ID produktu z query parametru
+  const { product, token, code } = req.query; // Získáme produkt, token a případně kód z query parametru
   
+  // Ověření tokenu
+  const validToken = "Un1Mark-7A9sKz!"; // Tvůj správný token (tohle by mělo být ideálně bezpečně uložené na serveru)
+
+  if (token !== validToken) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid token' }); // Pokud je token neplatný
+  }
+
   if (!product) {
     return res.status(400).json({ error: 'Product ID is required' });
   }
 
-  // Představme si, že máme více lokalit pro různé produkty
+  // Tady je logika pro vrácení různých lokalit podle ID produktu
   let availabilityData = {};
 
   if (product === 'product123') {
